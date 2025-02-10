@@ -1,0 +1,74 @@
+pipeline {
+    agent any
+
+    environment {
+        PYTHONPATH = '.'
+        STACK_NAME = 'todo-list-aws-staging'
+        REGION = 'us-east-1'
+        PATH_AGENT_VENV='/opt/venv/bin'
+    }
+
+    stages {
+        stage('Get Code') {
+            steps {
+                git url: 'https://github.com/flaviooria/CI_CP1.3.git', branch: 'develop'
+                stash name: 'source_code', includes: '**'
+            }
+        }
+
+        stage('Static Test') {
+            agent { label 'tests' }
+
+            steps {
+                unstash 'source_code'
+
+                sh '$PATH_AGENT_VENV/flake8 --format=pylint ./src > flake8.out'
+                recordIssues tools: [flake8(name: 'Flake8', pattern: 'flake8.out', reportEncoding: 'UTF-8')]
+                
+                sh '$PATH_AGENT_VENV/bandit -r src -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {severity} {msg}"'
+                recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')]
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh 'sam build'
+                sh 'sam validate --region us-east-1'
+                sh 'sam deploy --config-file samconfig.toml --config-env staging sam deploy --no-confirm-changeset --no-fail-on-empty-changeset'
+
+                script {
+                    def apiUrl = sh(script: """
+                        sam list stack-outputs --stack-name ${STACK_NAME} --region ${REGION} --output json | jq -r '.[] | select(.OutputKey=="BaseUrlApi") | .OutputValue'
+                    """, returnStdout: true).trim()
+
+                    env.BASE_URL = apiUrl
+                    echo "API BASE_URL: ${env.BASE_URL}"
+                }
+            }
+        }
+
+        stage('Rest Test') {
+            
+            agent { label 'rest' }
+            
+            steps {
+                unstash 'source_code'
+
+                sh '$PATH_AGENT_VENV/pytest -s test/integration/todoApiTest.py'
+            }
+        }
+
+        stage('Promote') {
+            steps {
+                sh 'git switch master'
+                sh 'git merge develop'
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
