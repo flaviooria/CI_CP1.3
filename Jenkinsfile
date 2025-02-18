@@ -18,8 +18,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh 'sam build'
-                sh 'sam validate --region us-east-1'
-                sh 'sam deploy --config-file samconfig.toml --config-env production sam deploy --no-confirm-changeset --no-fail-on-empty-changeset'
+                sh 'sam validate --region ${REGION}'
+                sh 'sam deploy --config-file samconfig.toml --config-env production --no-confirm-changeset --no-fail-on-empty-changeset'
 
                 script {
                     def apiUrl = sh(script: """
