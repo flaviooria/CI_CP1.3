@@ -52,7 +52,7 @@ pipeline {
             steps {
                 sh'''
                 git switch master
-                git merge develop
+                git merge develop --no-edit
                 git push -u origin master
                 '''
             }
