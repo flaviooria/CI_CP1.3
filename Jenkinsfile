@@ -52,8 +52,8 @@ pipeline {
             steps {
                 sh'''
                 git switch master
-                git merge develop --no-edit
-                git push -u origin master
+                git pull origin master
+                ls -la
                 '''
             }
         }
