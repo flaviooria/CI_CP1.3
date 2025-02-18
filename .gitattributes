@@ -1,3 +1,3 @@
+Jenkinsfile merge=ours
 Jenkinsfile_* merge=ours
 test/integration/** merge=ours
-[jJ]enkinsfile merge=ours
