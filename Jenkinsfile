@@ -28,8 +28,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh 'sam build'
-                sh 'sam validate --region us-east-1'
-                sh 'sam deploy --config-file samconfig.toml --config-env staging sam deploy --no-confirm-changeset --no-fail-on-empty-changeset'
+                sh "sam validate --region ${REGION}"
+                sh 'sam deploy --config-file samconfig.toml --config-env staging --no-confirm-changeset --no-fail-on-empty-changeset'
 
                 script {
                     def apiUrl = sh(script: """
@@ -50,18 +50,30 @@ pipeline {
 
         stage('Promote') {
             steps {
-                sh'''
-                git switch master
+                sh """
+                git checkout master || git checkout -b master origin/master
                 git pull origin master
+                git merge develop --no-edit
                 ls -la
-                '''
+                """
+
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'gh_token', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                        sh '''
+                        git config user.name "Flavio Oria"
+                        git config user.email "flavio.oriap@gmail.com"
+                        git remote set-url origin https://$GIT_USER:$GIT_PASS@github.com/flaviooria/CI_CP1.3.git
+                        git push origin master
+                        '''
+                    }
+                }
             }
         }
     }
 
     post {
         always {
-            cleanWs()
+            deleteDir()
         }
     }
 }
