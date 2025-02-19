@@ -12,6 +12,8 @@ pipeline {
         stage('Get Code') {
             steps {
                 git url: 'https://github.com/flaviooria/CI_CP1.3.git', branch: 'develop'
+                sh 'wget -q -O samconfig.toml https://raw.githubusercontent.com/flaviooria/todo-list-aws-config/refs/heads/staging/samconfig.toml'
+                sh 'cat samconfig.toml'
             }
         }
 
