@@ -23,3 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.4] - 2025-02-18
 ### Added Jenkinsfile_reto1
 - Se añadio las credenciales de github para hacer push
+
+## [1.0.5] - 2025-02-19
+### Added Jenkinsfile_agentes - reto2
+- Se corrigio el Jenkinsfile_agentes, la etapa `Promote` ahora realiza el push a master correctamente.
