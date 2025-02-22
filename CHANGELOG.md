@@ -27,3 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.5] - 2025-02-19
 ### Added Jenkinsfile_agentes - reto2
 - Se corrigio el Jenkinsfile_agentes, la etapa `Promote` ahora realiza el push a master correctamente.
+
+## [1.0.6] - 2025-02-22
+### Added Settings Multibranch Pipeline
+- Se realizo la configuración en Jenkins para el pipeline de multibranch.
